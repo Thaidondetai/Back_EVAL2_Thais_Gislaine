@@ -37,7 +37,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            ssh -o StrictHostKeyChecking=no ubuntu@10.0.142.98 << 'EOF'
+            ls -la ~/.ssh
+            ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@10.0.142.98 << 'EOF'
               docker pull thaisca1/backend_evaluacion_2:latest
               docker stop backend || true
               docker rm backend || true
