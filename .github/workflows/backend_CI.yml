@@ -3,11 +3,10 @@ name: Backend CI/CD
 on:
   push:
     branches:
-      - main
       - deploy
 
 jobs:
-  ci:
+  build-push-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,17 +21,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Check Node version
-        run: node -v
-
-  docker:
-    needs: ci
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
       - name: Login Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
@@ -41,3 +29,25 @@ jobs:
 
       - name: Push image
         run: docker push thaisca1/backend_evaluacion_2:latest
+
+      - name: Deploy to private EC2 via bastion
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            ssh -o StrictHostKeyChecking=no ubuntu@10.0.142.98 << 'EOF'
+              docker pull thaisca1/backend_evaluacion_2:latest
+              docker stop backend || true
+              docker rm backend || true
+              docker run -d -p 3000:3000 \
+                --name backend \
+                --restart always \
+                -e DB_HOST=10.0.155.71 \
+                -e DB_USER=root \
+                -e DB_PASSWORD=root \
+                -e DB_NAME=proyecto_db \
+                -e DB_PORT=3306 \
+                thaisca1/backend_evaluacion_2:latest
+            EOF
