@@ -37,17 +37,15 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            ssh -o StrictHostKeyChecking=no ubuntu@10.0.142.98 << 'EOF'
+            ssh ubuntu@10.0.142.98 << 'EOF'
               docker pull thaisca1/backend_evaluacion_2:latest
               docker stop backend || true
               docker rm backend || true
               docker run -d -p 3000:3000 \
                 --name backend \
-                --restart always \
                 -e DB_HOST=10.0.155.71 \
                 -e DB_USER=root \
                 -e DB_PASSWORD=root \
                 -e DB_NAME=proyecto_db \
-                -e DB_PORT=3306 \
                 thaisca1/backend_evaluacion_2:latest
             EOF
