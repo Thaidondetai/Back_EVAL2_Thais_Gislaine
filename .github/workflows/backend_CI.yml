@@ -38,10 +38,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             ssh ubuntu@10.0.142.98 << 'EOF'
-              docker pull thaisca1/backend_evaluacion_2:latest
-              docker stop backend || true
-              docker rm backend || true
-              docker run -d -p 3000:3000 \
+              sudo docker pull thaisca1/backend_evaluacion_2:latest
+              sudo docker stop backend || true
+              sudo docker rm backend || true
+              sudo docker run -d -p 3000:3000 \
                 --name backend \
                 -e DB_HOST=10.0.155.71 \
                 -e DB_USER=root \
